@@ -19,16 +19,15 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.data.converter.StringToIntegerConverter;
-import com.vaadin.flow.router.BeforeEnterEvent;
-import com.vaadin.flow.router.BeforeEnterObserver;
-import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.router.Route;
-import com.vaadin.flow.router.RouteAlias;
+import com.vaadin.flow.router.*;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
-import java.time.Duration;
-import java.util.Optional;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
+
+import java.time.Duration;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+import java.util.Optional;
 
 @PageTitle("Weather Station")
 @Route(value = "station/:weatherEntryID?/:action?(edit)")
@@ -66,8 +65,10 @@ public class WeatherStationView extends Div implements BeforeEnterObserver {
         add(splitLayout);
 
         // Configure Grid
-        grid.addColumn("temperature").setAutoWidth(true);
-        grid.addColumn("time").setAutoWidth(true);
+        grid.addColumn(entry -> entry.getTemperature() + "º")
+                .setKey("temperature").setHeader("Temperature").setAutoWidth(true);
+        grid.addColumn(entry -> entry.getTime().format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM)))
+                .setKey("time").setHeader("Time").setAutoWidth(true);
         grid.addColumn("location").setAutoWidth(true);
         grid.setItems(query -> weatherEntryService.list(
                 PageRequest.of(query.getPage(), query.getPageSize(), VaadinSpringDataHelpers.toSpringDataSort(query)))
